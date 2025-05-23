@@ -115,3 +115,6 @@ Activity is logged to disk (JSONL/CSV), supporting replay/filtering
 Dashboard:
 The Streamlit app lets you generate, replay, and review events, add notes, and download logs
 
+
+
+![image](https://github.com/user-attachments/assets/79ecf16f-3cff-405a-9df5-6c29e4f302e3)
