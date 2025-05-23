@@ -2,7 +2,7 @@
 
 > A hands-on, interview-ready Python/Streamlit project that simulates realistic cyber attacks, SOC defense actions, and end-to-end incident handling—all mapped to MITRE ATT&CK and the OWASP Top 10.
 
----
+-----------------------------------------------------------------------------------------------------
 
 ## 🚀 Overview
 
@@ -12,7 +12,7 @@ It’s built for blue teamers, SOC analysts, and students looking to practice re
 You get instant attack/defense event generation, replayable logs, interactive dashboards, and mapped playbooks, all in Python.  
 Perfect for learning, demoing, or prepping for a SOC role.
 
----
+-----------------------------------------------------------------------------------------------------
 
 ## ⚡ Features
 
@@ -37,11 +37,10 @@ Perfect for learning, demoing, or prepping for a SOC role.
 - Metrics: blocked, escalated, average response time, analyst score
 - Downloadable logs, analyst notes, and a clean modern UI
 
----
+-----------------------------------------------------------------------------------------------------
 
 ## 📦 File Structure
 
-```text
 attack_simulator/         # Attack event generation (OWASP/MITRE/CVE mapped)
 defense_simulator/        # Maps attacks to defense actions and escalation
 logger/                   # Logging and replay system
@@ -114,7 +113,3 @@ Activity is logged to disk (JSONL/CSV), supporting replay/filtering
 
 Dashboard:
 The Streamlit app lets you generate, replay, and review events, add notes, and download logs
-
-
-
-![image](https://github.com/user-attachments/assets/79ecf16f-3cff-405a-9df5-6c29e4f302e3)
