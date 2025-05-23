@@ -1,122 +1,117 @@
-SOC Attack-Defense Simulator
-A hands-on, interview-ready Python/Streamlit project that simulates realistic cyber attacks, SOC defense actions, and end-to-end incident handling—all mapped to MITRE ATT&CK and the OWASP Top 10.
+# SOC Attack-Defense Simulator
 
-🚀 Overview
-SOC Attack-Defense Simulator is a full-featured simulation environment for generating, visualizing, and analyzing cyber attack/defense workflows. The platform is built for blue teamers, SOC analysts, and students looking to practice real-world detection and response—without needing a live network or expensive tooling.
+> A hands-on, interview-ready Python/Streamlit project that simulates realistic cyber attacks, SOC defense actions, and end-to-end incident handling—all mapped to MITRE ATT&CK and the OWASP Top 10.
 
-You get instant attack/defense event generation, replayable logs, interactive dashboards, and mapped playbooks, all in Python. Perfect for learning, demoing, or prepping for a SOC role.
+---
 
-⚡ Features
-Attack Simulator
+## 🚀 Overview
 
-Generates fake but realistic security events (SQLi, phishing, ransomware, SSRF, insider threats, etc.)
+**SOC Attack-Defense Simulator** is a full-featured environment for generating, visualizing, and analyzing cyber attack/defense workflows.  
+It’s built for blue teamers, SOC analysts, and students looking to practice real-world detection and response—without needing a live network or expensive tools.
 
-All attacks mapped to MITRE ATT&CK techniques and CVEs
+You get instant attack/defense event generation, replayable logs, interactive dashboards, and mapped playbooks, all in Python.  
+Perfect for learning, demoing, or prepping for a SOC role.
 
-Supports campaign chaining, attacker personas, and both true/false positives
+---
 
-Defense Simulator
+## ⚡ Features
 
-Maps attacks to multi-stage defense actions, recommendations, and escalation workflows
+### Attack Simulator
+- Generates realistic security events (SQLi, phishing, ransomware, SSRF, insider threats, more)
+- All attacks mapped to **MITRE ATT&CK** techniques and **CVEs**
+- Supports campaign chaining, attacker personas, true/false positives, and missed log events
 
-Probabilistic outcomes (not every defense is a win), with urgent escalations when appropriate
+### Defense Simulator
+- Maps attacks to realistic, multi-stage defense actions, recommendations, and escalation workflows
+- Probabilistic outcomes (not every defense is a win), with urgent escalation logic
+- Playbooks and remediation steps for every attack scenario
 
-Defense playbooks and remediation guidance included for each attack
+### Logger Module
+- Logs all attack/defense events to **JSONL** or **CSV** (with log rotation)
+- Filter by true positives or failed defenses for targeted log review
+- Replay logs for dashboard visualization or retroactive analysis
 
-Logger Module
+### Interactive Streamlit Dashboard
+- Live and replay views of all attacks/defenses
+- Incident deep dive cards, campaign story arcs, escalation markers
+- Metrics: blocked, escalated, average response time, analyst score
+- Downloadable logs, analyst notes, and a clean modern UI
 
-Logs all attack/defense events to JSONL or CSV (with log rotation)
+---
 
-Supports event filtering (true positives only, failed defenses only)
+## 📦 File Structure
 
-Allows replay of logs for dashboard visualization or retroactive analysis
+```text
+attack_simulator/         # Attack event generation (OWASP/MITRE/CVE mapped)
+defense_simulator/        # Maps attacks to defense actions and escalation
+logger/                   # Logging and replay system
+dashboard/                # Streamlit UI (dashboard.py)
+logs/                     # Log output (ignored by .gitignore)
+tests/                    # Simple test scripts
+README.md
+requirements.txt
+.gitignore
 
-Interactive Streamlit Dashboard
+-----------------------------------------------------------------------------------------------------
 
-View attacks and mapped defenses in real time or from past logs
-
-Incident deep dives, campaign story arcs, and metrics (blocked, escalated, avg. response time, analyst score)
-
-Downloadable logs, escalation markers, analyst notes, and a clean, modern UI
-
-🛠️ Installation
+💻 Installation
 Clone the repo and install dependencies:
 
-bash
-Copy
-Edit
 git clone https://github.com/yourname/soc-attack-defense-simulator.git
 cd soc-attack-defense-simulator
 python -m venv venv
-source venv/bin/activate  # or venv\Scripts\activate on Windows
+source venv/bin/activate      # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
-Install extra dependencies for the dashboard:
+
+Or install core dependencies directly:
+
+pip install streamlit pandas faker plotly
+
+-----------------------------------------------------------------------------------------------------
+
+▶️ Usage
+Start the dashboard:
 
 bash
 Copy
 Edit
-pip install streamlit plotly pandas faker
-▶️ Running the Dashboard
-From the root of the repo:
 
-bash
-Copy
-Edit
 streamlit run dashboard/dashboard.py
-This will launch the interactive dashboard in your browser.
 
-Generate random attacks, view real SOC-style defense responses, explore escalations, and download logs.
+The dashboard will open in your web browser.
 
-📋 File Structure
-attack_simulator/attack_simulator.py: Attack event generation (OWASP/MITRE/CVE mapped)
+Generate random attack events, view mapped SOC defense responses, explore escalations, download logs, and add analyst notes.
 
-defense_simulator/defense_simulator.py: Maps attacks to realistic defense actions, escalation, recommendations
+-----------------------------------------------------------------------------------------------------
 
-logger/logger.py: Flexible event logging and replay system
+🧠 Example Use Cases
+SOC Interview Prep: Practice incident response, detection, and log review in a safe, simulated environment.
 
-dashboard/dashboard.py: Main Streamlit UI with all dashboard logic
+Learning/Teaching: Show how blue teams defend against the most common and most dangerous cyber threats.
 
-tests/tests.py: Pytest-style sanity checks for attack, defense, logging
+Portfolio: Prove your Python, Streamlit, and security automation skills with a practical, hands-on project.
 
-💡 Example Use Cases
-SOC Interview Practice: Demo incident response, detection, and log review in a live simulated environment.
+-----------------------------------------------------------------------------------------------------
 
-Learning/Teaching: Visualize and explain how SOCs defend against the most common and most dangerous cyber threats.
+🔗 Extending the Project
+Add custom attacks/defenses in attack_simulator.py or defense_simulator.py
 
-Portfolio: Prove your Python, Streamlit, security, and automation skills with a practical project.
+Integrate SIEM APIs or ticketing systems for more realism
 
-🖥️ Screenshots
-(Insert dashboard screenshots or GIFs here if available)
+Expand dashboards with more metrics, analytics, or custom visualizations
 
-🧩 Extending the Project
-Add your own custom attacks or defense logic in attack_simulator.py or defense_simulator.py.
-
-Integrate with SIEM APIs or ticketing systems for more realism.
-
-Expand dashboards with more metrics or real-world log ingest.
+-----------------------------------------------------------------------------------------------------
 
 📝 How It Works
 Attack Events:
-Simulate an attack using the AttackSimulator—mapped to MITRE, CVE, and attacker persona.
+Generated using AttackSimulator (mapped to MITRE, CVE, and persona)
 
 Defense Mapping:
-Each attack is processed by DefenseSimulator to determine the outcome (blocked, escalated, failed, etc.), including recommendations and escalation flags.
+Each attack is processed by DefenseSimulator to determine outcome, recommendations, and escalation
 
 Logging:
-All activity is logged to disk (JSONL/CSV), supporting replay and filtering for blue team analysis.
+Activity is logged to disk (JSONL/CSV), supporting replay/filtering
 
 Dashboard:
-The Streamlit app ties it all together, letting you generate/replay events, review incidents, add analyst notes, and download log files for later.
+The Streamlit app lets you generate, replay, and review events, add notes, and download logs
 
-📚 Project Goals
-Hands-on, portfolio-ready SOC simulation for blue teamers
-
-Realistic event flows for detection and response
-
-Built to impress at interviews, on GitHub, or as a security training tool
-
-🤝 Contributing
-Pull requests welcome. Open an issue or PR if you’d like to contribute or spot a bug.
-
-📄 License
-MIT License
