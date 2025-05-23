@@ -1,6 +1,6 @@
 # SOC Attack-Defense Simulator
 
-> A hands-on, interview-ready Python/Streamlit project that simulates realistic cyber attacks, SOC defense actions, and end-to-end incident handling—all mapped to MITRE ATT&CK and the OWASP Top 10.
+A hands-on, interview-ready Python/Streamlit project that simulates realistic cyber attacks, SOC defense actions, and end-to-end incident handling—all mapped to MITRE ATT&CK and the OWASP Top 10.
 
 -----------------------------------------------------------------------------------------------------
 
