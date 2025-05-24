@@ -237,22 +237,28 @@ ATTACKER_PERSONAS = [
 ]
 
 def choose_persona():
+    """Randomly select an attacker persona (for campaigns/story arcs)."""
     return random.choice(ATTACKER_PERSONAS)
 
 class AttackSimulator:
+    """
+    Generates attack events and campaigns for blue team/SOC simulation.
+    Includes all logic for randomization, campaign simulation, and enrichment.
+    """
     def __init__(self):
         self.fake = Faker()
         self.attacker_profiles = []
-    
+
     def random_geolocation(self):
-        """Random city/country, sometimes mismatched to simulate VPN/proxy."""
+        """Generate a fake city/country (simulates VPN/proxy routing)."""
+        # 15% chance of 'obviously mismatched' location (adds realism)
         if random.random() < 0.15:
             return {"city": self.fake.city(), "country": self.fake.country()}
         else:
             return {"city": self.fake.city(), "country": self.fake.country()}
-    
+
     def random_dest_service(self):
-        """Simulate a destination port/service."""
+        """Simulate random target port/service for the attack."""
         services = [
             {"port": 22, "service": "SSH"},
             {"port": 80, "service": "HTTP"},
@@ -265,9 +271,9 @@ class AttackSimulator:
             {"port": 8080, "service": "HTTP-Alt"}
         ]
         return random.choice(services)
-    
+
     def create_attacker_profile(self, persona=None, insider=False):
-        """Create persistent attacker for campaign simulation."""
+        """Generate persistent attacker profile (IP, user, location) for campaign mode."""
         if persona is None:
             persona = choose_persona()
         if insider:
@@ -284,34 +290,34 @@ class AttackSimulator:
             "location": location,
             "persona": persona
         }
-    
+
     def map_attack_metadata(self, attack):
-        """Add MITRE, CVEs, defense, patch, playbook, etc."""
-        meta = {}
+        """Add MITRE, CVEs, defense recs, patch info, playbook to each attack event."""
         name = attack["name"]
-        meta["mitre_technique"] = MITRE.get(name, "")
-        meta["cves"] = CVES.get(name, [])
-        meta["defense_recommendation"] = DEFENSES.get(name, "")
-        meta["patch_required"] = True if PATCHES.get(name) else False
-        meta["patch_instructions"] = PATCHES.get(name, "")
-        meta["playbook_step"] = PLAYBOOKS.get(name, "")
-        return meta
+        return {
+            "mitre_technique": MITRE.get(name, ""),
+            "cves": CVES.get(name, []),
+            "defense_recommendation": DEFENSES.get(name, ""),
+            "patch_required": True if PATCHES.get(name) else False,
+            "patch_instructions": PATCHES.get(name, ""),
+            "playbook_step": PLAYBOOKS.get(name, "")
+        }
 
     def attack_defense_pairing(self, attack_event):
-        """Return a defense event paired to an attack event."""
-        # Simulate a SOC defense action
+        """
+        Demo: Simulates what the defense would look like for a given attack event.
+        This is used for attack-defense mapping and dashboard view.
+        """
         soc_actions = [
-            "Blocked by WAF",
-            "Alert sent to SOC Analyst",
-            "Session terminated",
-            "User account disabled",
-            "Source IP banned at firewall",
-            "Email quarantined",
-            "Endpoint isolated",
-            "Incident escalated to Tier 2"
+            "Blocked by WAF", "Alert sent to SOC Analyst", "Session terminated",
+            "User account disabled", "Source IP banned at firewall",
+            "Email quarantined", "Endpoint isolated", "Incident escalated to Tier 2"
         ]
         return {
-            "defense_timestamp": (datetime.strptime(attack_event['timestamp'], "%Y-%m-%d %H:%M:%S") + timedelta(seconds=random.randint(2, 30))).strftime("%Y-%m-%d %H:%M:%S"),
+            "defense_timestamp": (
+                datetime.strptime(attack_event['timestamp'], "%Y-%m-%d %H:%M:%S")
+                + timedelta(seconds=random.randint(2, 30))
+            ).strftime("%Y-%m-%d %H:%M:%S"),
             "attack_event_id": attack_event['event_id'],
             "defense_action": random.choice(soc_actions),
             "playbook_step": attack_event.get('playbook_step', ""),
@@ -319,15 +325,20 @@ class AttackSimulator:
             "mitre_technique": attack_event.get('mitre_technique', ""),
             "cves": attack_event.get('cves', []),
         }
-    
+
     def choose_persona(self):
+        """Shortcut to random persona (useful for campaigns)."""
         return random.choice(ATTACKER_PERSONAS)
 
     def generate_attack_event(self, attacker_profile=None, insider=False, force_attack=None, campaign_stage=None):
-        """Generate single attack event, now includes: MITRE, CVEs, defense, playbook, benign/false positives, missed logs, etc."""
+        """
+        Generate one attack event (can be mapped to a campaign, single event, or false positive).
+        Handles: true/false positive, missed log, context, all metadata for blue team demo.
+        """
         attack_list = ATTACKS
-        weights = [8,6,16,5,9,6,12,4,5,3,18,12,5,8,1]
+        weights = [8,6,16,5,9,6,12,4,5,3,18,12,5,8,1]  # Controls how common each attack is
 
+        # Pick attack type, optionally force a specific attack
         if force_attack:
             attack = next((a for a in attack_list if a["name"] == force_attack), None)
             if not attack:
@@ -335,6 +346,7 @@ class AttackSimulator:
         else:
             attack = random.choices(attack_list, weights=weights, k=1)[0]
 
+        # Source info: real attacker or random, with possible insider
         if attacker_profile:
             source_ip = attacker_profile['ip']
             attacker_user = attacker_profile['user']
@@ -346,7 +358,7 @@ class AttackSimulator:
             attacker_loc = self.random_geolocation()
             persona = None
 
-        # Potentially simulate a benign/false positive event
+        # Simulate false positives/benign events (SOC tuning/training realism)
         is_true_positive = random.random() > 0.22
         benign_reason = ""
         if not is_true_positive:
@@ -359,7 +371,7 @@ class AttackSimulator:
                 "Test traffic from internal red team"
             ])
 
-        # Simulate missed logs (attack happened, but log missing)
+        # Simulate missed logs (logs that should be there but are missing)
         is_logged = True
         missed_log_context = ""
         if attack["name"] == "Security Logging and Monitoring Failures" or random.random() < 0.08:
@@ -372,14 +384,15 @@ class AttackSimulator:
                 "Agent crash led to no logs for 30 min."
             ])
 
-        # Destination info
+        # Generate destination info (target host, port, service)
         dest_ip = self.fake.ipv4_private()
         dest_info = self.random_dest_service()
 
-        # Unique event ID
+        # Unique event ID for tracking and correlation
         event_id = str(uuid.uuid4())
         meta = self.map_attack_metadata(attack)
-        
+
+        # All fields bundled into a single event dict (matches dashboard table columns)
         event = {
             "event_id": event_id,
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -402,40 +415,46 @@ class AttackSimulator:
             "is_logged": is_logged,
             "missed_log_context": missed_log_context,
             "stage": campaign_stage if campaign_stage else "",
-            # Metadata
+            # Metadata (MITRE, CVE, defense rec, patch, playbook)
             **meta
         }
         return event
 
     def generate_attack_burst(self, burst_len=4, persona=None, insider=False):
-        """Simulate a burst of attacks from the same profile/persona."""
+        """
+        Simulate a burst of attacks (same actor/persona). Used for campaign/chained scenarios.
+        """
         attacker = self.create_attacker_profile(persona=persona, insider=insider)
         burst_events = []
         for i in range(burst_len):
-            # Use campaign stages if burst_len matches stages count
             stage = CAMPAIGN_STAGES[i] if i < len(CAMPAIGN_STAGES) else ""
             burst_events.append(self.generate_attack_event(attacker, insider=insider, campaign_stage=stage))
         return burst_events
 
     def generate_attack_campaign(self, n=10, persona=None):
-        """Simulate a longer attack campaign: multiple bursts from the same actor, chain stages."""
+        """
+        Generate a campaign: a sequence of attacks tied to a single persona, staged across phases.
+        """
         persona = persona or choose_persona()
         attacker = self.create_attacker_profile(persona=persona)
         events = []
-        # Recon phase (if available)
+        # Recon first if it's a preferred stage
         if "Port Scan" in persona.get("attack_preference", []):
             events.append(self.generate_attack_event(attacker, force_attack="Port Scan", campaign_stage="Recon"))
-        # Main campaign (preferred attacks, mapped to stages)
+        # Then chain the main preferred attacks (across campaign stages)
         for idx, atk_type in enumerate(persona.get("attack_preference", [])):
             stage = CAMPAIGN_STAGES[idx+1] if idx+1 < len(CAMPAIGN_STAGES) else ""
             events.append(self.generate_attack_event(attacker, force_attack=atk_type, campaign_stage=stage))
-        # Add some noise (random attacks)
+        # Add noise/random attacks to fill out the campaign
         for _ in range(max(0, n - len(events))):
             events.append(self.generate_attack_event(attacker))
         return events
 
     def generate_chained_attack(self, persona=None):
-        """Simulate attack story arc: Recon -> Exploit -> Persistence -> Exfiltration."""
+        """
+        Generate a story-arc attack (Recon -> Exploit -> Persistence -> Exfiltration)
+        Shows an attack progressing through multiple steps/phases.
+        """
         persona = persona or choose_persona()
         attacker = self.create_attacker_profile(persona=persona)
         story = []
@@ -449,11 +468,15 @@ class AttackSimulator:
         return story
 
     def generate_mixed_activity(self, n=20):
-        """Generate realistic stream: noise, bursts/campaigns, including benign/false positive events."""
+        """
+        Main event generator for dashboard/SOC feed. Creates realistic stream:
+        - Majority: random attacks
+        - Adds: 2-3 attack bursts (campaigns or noise)
+        - Shuffles for realism (not all attacks are related)
+        """
         events = []
         for _ in range(int(n * 0.6)):
             events.append(self.generate_attack_event())
-        # Add 2-3 bursts/campaigns
         for _ in range(random.randint(2,3)):
             burst = self.generate_attack_burst(burst_len=random.randint(3,5))
             events.extend(burst)
@@ -461,7 +484,10 @@ class AttackSimulator:
         return events
 
     def generate_attack_stream(self, n=20, start_time=None, avg_spacing_seconds=30):
-        """Generate n events spaced apart by random intervals."""
+        """
+        Generates a timeline of n attacks, each spaced apart by a random interval.
+        Used for plotting activity over time.
+        """
         if not start_time:
             start_time = datetime.now()
         events = []
@@ -474,7 +500,10 @@ class AttackSimulator:
         return events
 
     def maybe_inject_rare_event(self, events):
-        """Randomly inject a rare, critical event (like Zero-Day Ransomware)."""
+        """
+        Occasionally inject a rare, high-impact event (like ransomware).
+        Demo: 'real life' -- sometimes serious stuff just happens!
+        """
         if random.random() < 0.05:
             persona = choose_persona()
             attacker = self.create_attacker_profile(persona=persona)
@@ -484,8 +513,11 @@ class AttackSimulator:
 
     def generate_realistic_log(self, n=100):
         """
-        Mix: background events, bursts, campaigns, chains, insiders, rare events, true/false positives, missed logs,
-        playbooks, destination context, attack-defense pairing.
+        Highest-level generator. Combines:
+        - Mixed activity (noise, campaigns)
+        - Multiple chained attacks (for story arcs)
+        - Insider events, rare events, real false positives, and missed logs
+        - Bundles output as a dict ready for the dashboard or analysis
         """
         logs = []
         logs.extend(self.generate_attack_stream(n=int(n*0.6)))
@@ -496,20 +528,19 @@ class AttackSimulator:
             for _ in range(random.randint(2, 4)):
                 logs.append(self.generate_attack_event(insider=True))
         logs = self.maybe_inject_rare_event(logs)
-        # Simulate out-of-order/mixed timeline
+        # Sort by timestamp for real-world look
         logs.sort(key=lambda x: x['timestamp'])
-        # Generate attack-defense pairing for every log (if logged)
+        # For every log that was 'logged', generate a paired defense event
         attack_defense_pairs = []
         for log in logs:
             if log['is_logged']:
                 attack_defense_pairs.append(self.attack_defense_pairing(log))
         return {"attack_logs": logs, "defense_logs": attack_defense_pairs}
 
-# Example usage:
+# Quick demo/testing: print out sample logs if run standalone
 if __name__ == "__main__":
     sim = AttackSimulator()
     logs = sim.generate_realistic_log(10)
-    # Print out one attack log and matching defense for demo
     print("=== Sample Attack Log ===")
     for event in logs["attack_logs"]:
         print(event)
