@@ -1,4 +1,4 @@
-![SOC Attack-Defense Simulator Dashboard](Dashboard_Image.png)
+![SOC Attack-Defense Simulator Dashboard](Dashboard-Image.png)
 
 # SOC Attack-Defense Simulator
 
